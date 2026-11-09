@@ -496,6 +496,16 @@ textarea.ta:focus-visible{outline:2px dashed #8E2F51;outline-offset:8px}
   .ovbox.fin .ttl{font-size:82px}
   .frame{width:86%;margin-top:2%}
 }
+
+/* --- video note: circle, tap to play, no thank-you text under it --- */
+.rw:not(.rwc){justify-content:center}
+.frame{position:relative;width:min(62%,300px);aspect-ratio:1/1;padding:0;margin-top:5%;background:#2B2330;border:4px solid #eee4d0;border-radius:50%;overflow:hidden;transform:none;box-shadow:0 8px 18px rgba(60,18,38,.35);cursor:pointer}
+.frame.nov{cursor:default}
+.frame video,.frame .ph{display:block;width:100%;height:100%;aspect-ratio:1/1;object-fit:cover;border-radius:50%}
+.frame:not(.nov)::after{content:"\25B6";position:absolute;left:50%;top:50%;width:64px;height:64px;margin:-32px 0 0 -32px;border-radius:50%;background:rgba(255,255,255,.85);color:#7a2444;font:400 26px/64px sans-serif;text-align:center;padding-left:4px;box-sizing:border-box}
+.frame.playing::after{display:none}
+.frame:focus-visible{outline:3px solid #eee4d0;outline-offset:4px}
+@media (max-width:819px){.frame{width:62%;margin-top:3%;padding:0}}
 </style>
 </head>
 <body>
@@ -518,7 +528,7 @@ textarea.ta:focus-visible{outline:2px dashed #8E2F51;outline-offset:8px}
 'use strict';
 var CONFIG={
   endpoint:'https://script.google.com/macros/s/AKfycbzrdlcpmizfjxVNs8SehJyZhBNoifFwG_PSyUTCXuzo-pGIkUW7w_TyYytWHCFjjxYvwQ/exec',   // адрес Google Apps Script (веб-приложение), куда уходят ответы
-  video:'',      // ссылка на видео-сюрприз
+  video:'video.mp4',      // ссылка на видео-сюрприз
   needed:4       // минимум ответов для сюрприза
 };
 var Q=[
@@ -677,8 +687,17 @@ function rightContent(step,live){
   }else if(step===LAST){
     var n=count();
     if(n>=CONFIG.needed){
-      f.innerHTML='<div class="rw"><div class="rw-h">а вот и маленькое послание от меня</div><div class="frame">'+(CONFIG.video?'<video controls playsinline preload="metadata"></video>':'<div class="ph">здесь будет видео от меня</div>')+'</div><p class="rw-t">рада, что ты здесь, мне ценно твоё время и внимание!</p></div>';
-      if(live&&CONFIG.video){f.querySelector('video').src=CONFIG.video}
+      f.innerHTML='<div class="rw"><div class="rw-h">а вот и маленькое послание от меня</div><div class="frame'+(CONFIG.video?'':' nov')+'"'+(CONFIG.video?' role="button" tabindex="0" aria-label="включить видео"':'')+'>'+(CONFIG.video?'<video playsinline preload="metadata"></video>':'<div class="ph">здесь будет видео от меня</div>')+'</div></div>';
+      if(live&&CONFIG.video){
+        var v=f.querySelector('video'),fr=f.querySelector('.frame');
+        v.src=CONFIG.video;
+        var tog=function(){if(v.paused)v.play();else v.pause()};
+        fr.addEventListener('click',tog);
+        fr.addEventListener('keydown',function(ev){if(ev.key===' '||ev.key==='Enter'){ev.preventDefault();tog()}});
+        v.addEventListener('play',function(){fr.classList.add('playing')});
+        v.addEventListener('pause',function(){fr.classList.remove('playing')});
+        v.addEventListener('ended',function(){fr.classList.remove('playing')});
+      }
     }else{
       f.innerHTML='<div class="rw rwc"><div class="rwnote"><img class="rwn" src="'+IMG.noteThanks+'" alt="" draggable="false"><p class="rw-t">рада, что ты здесь, мне ценно твоё время и внимание!</p></div></div>';
     }
