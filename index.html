@@ -506,6 +506,9 @@ textarea.ta:focus-visible{outline:2px dashed #8E2F51;outline-offset:8px}
 .frame.playing::after{display:none}
 .frame:focus-visible{outline:3px solid #eee4d0;outline-offset:4px}
 @media (max-width:819px){.frame{width:62%;margin-top:3%;padding:0}}
+
+/* --- typed text must always be Detstvo (also in browsers that otherwise fall back) --- */
+textarea.ta,.write textarea,input.name,.signrow input{font-family:'Detstvo','Morfin Sans','Helvetica Neue',Arial,sans-serif !important}
 </style>
 </head>
 <body>
@@ -709,9 +712,9 @@ function rightContent(step,live){
     }else{ta=el('div','ta');ta.textContent=state.answers[i]}
     w.appendChild(ta);
     if(i===Q.length-1){
-      var sr=el('div','signrow'),sl=el('span',null,'подпись (необязательно)'),inp;
+      var sr=el('div','signrow'),sl=el('span',null,'подпись'),inp;
       if(live){
-        inp=el('input','name');inp.type='text';inp.maxLength=60;inp.value=state.name;inp.placeholder='имя';inp.setAttribute('aria-label','подпись, необязательно');
+        inp=el('input','name');inp.type='text';inp.maxLength=60;inp.value=state.name;inp.placeholder='имя';inp.setAttribute('aria-label','подпись');
         inp.addEventListener('input',function(){state.name=inp.value;save();state.sent=false;state.error=false;updateUI()});
       }else{inp=el('div','name');inp.textContent=state.name}
       sr.append(sl,inp);w.appendChild(sr);
@@ -839,6 +842,7 @@ function submit(){
 nextBtn.addEventListener('click',function(){if(state.step===Q.length&&!state.sent)submit();else go(1)});
 backBtn.addEventListener('click',function(){go(-1)});
 if(mq.addEventListener)mq.addEventListener('change',renderLive);
+if(document.fonts&&document.fonts.load){try{document.fonts.load("20px Detstvo","заполни здесь").catch(function(){})}catch(e){}}
 renderLive();
 })();
 </script>
